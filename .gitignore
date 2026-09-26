@@ -6,3 +6,4 @@ geometry/*.log
 .DS_Store
 *.local
 .vercel
+.env*
