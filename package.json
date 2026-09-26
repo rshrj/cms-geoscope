@@ -1,0 +1,45 @@
+{
+  "name": "cms-geoscope",
+  "version": "0.1.0",
+  "description": "Interactive 3D viewer for the CMS Phase-2 detector geometry",
+  "scripts": {
+    "export-geometry": "cmssw/export-geometry.sh",
+    "convert": "node --max-old-space-size=8192 tools/convert.mjs",
+    "detids": "node tools/detids.mjs",
+    "data": "npm run convert && npm run detids",
+    "dev": "vite",
+    "typecheck": "tsc",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test"
+  },
+  "type": "module",
+  "dependencies": {
+    "jsroot": "^7.11.1",
+    "n8ao": "^2.0.1",
+    "postprocessing": "^6.39.5",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/three": "^0.186.0",
+    "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.9",
+    "typescript": "~6.0",
+    "typescript-eslint": "^8.70.1",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "author": "Rishi Raj <me@rishiraj.ch>",
+  "license": "MIT"
+}

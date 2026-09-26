@@ -1,0 +1,7 @@
+node_modules/
+dist/
+public/data/
+geometry/*.root
+geometry/*.log
+.DS_Store
+*.local

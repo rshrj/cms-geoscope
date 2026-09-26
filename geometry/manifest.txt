@@ -1,0 +1,13 @@
+date:       2026-09-26T16:43:50Z
+release:    CMSSW_20_1_X_2026-09-13-2300
+arch:       el9_aarch64_gcc14
+geometry:   Run4D127
+globaltag:  auto:phase2_realistic_T35
+files:
+  cmsRecoGeom-Run4D127.root           165968548  ca72302c8412129e
+  cmsSimGeom-Run4D127.root              2953783  69472ad525a435fb
+  cmsTGeoRecoGeom-Run4D127.root         7461491  7cbf813d3de194a2
+log messages (error/exception lines):
+  reco.log       2
+  sim.log        0
+  tgeo-reco.log  219
