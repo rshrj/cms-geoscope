@@ -13,6 +13,7 @@ import { createStage } from './stage';
 import { PlacementTree } from './tree';
 import { buildPanel, progress, showIsolation } from './ui';
 import { createFlight } from './views';
+import '@fontsource-variable/inter/wght.css';
 import './style.css';
 
 const canvas = document.getElementById('view') as HTMLCanvasElement;

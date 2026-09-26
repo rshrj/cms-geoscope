@@ -5,7 +5,7 @@
   --text: #e8eaef;
   --muted: #8b93a3;
   --accent: #e0474f;
-  font-family: Inter, system-ui, sans-serif;
+  font-family: 'Inter Variable', Inter, system-ui, sans-serif;
   color: var(--text);
 }
 
