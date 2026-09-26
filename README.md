@@ -144,6 +144,15 @@ npm run format    # apply Prettier
 Source lives in `src/`, tests in `tests/` (Vitest). TypeScript is pinned to 6.0
 because `typescript-eslint` does not support 7.x yet.
 
+## Roadmap
+
+Planned features are tracked as [issues](https://github.com/rshrj/cms-geoscope/issues),
+grouped by label: `physics`, `viewing`, `output`, `usability` and `geometries`. Issues
+labelled [`next-up`](https://github.com/rshrj/cms-geoscope/labels/next-up) are planned first,
+because they need no new data. Small ones are labelled
+[`good first issue`](https://github.com/rshrj/cms-geoscope/labels/good%20first%20issue).
+Ideas and requests are welcome.
+
 ## License
 
 MIT, see [LICENSE](LICENSE).
