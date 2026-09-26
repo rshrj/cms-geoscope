@@ -144,6 +144,25 @@ npm run format    # apply Prettier
 Source lives in `src/`, tests in `tests/` (Vitest). TypeScript is pinned to 6.0
 because `typescript-eslint` does not support 7.x yet.
 
+## Deploying
+
+The app is static, so any static host works. The generated data is large (about 300 MB), which
+is why `npm run build` also gzips everything in `dist/data` (about 80 MB afterwards) and writes
+`dist/data/compressed.json`, an index the viewer uses to fetch and unpack the files in the
+browser. The step is safe to re-run, checks every file by decompressing it before removing the
+original, and does nothing when there is no data. The dev server keeps serving the raw files.
+
+```sh
+npm run build          # type-check, bundle, compress the data
+npm run verify-build   # re-check every compressed file against the index
+npm run preview        # try the deployed form locally
+npm run deploy         # build, verify, then upload dist/ with the Vercel CLI (first run asks you to log in)
+```
+
+The data is generated on your machine and is not in the repository, so deploys are made from
+a local build rather than by CI. Any other static host works the same way: upload `dist/`.
+Because the browser decompresses the files itself, the host does not need to compress them.
+
 ## Roadmap
 
 Planned features are tracked as [issues](https://github.com/rshrj/cms-geoscope/issues),

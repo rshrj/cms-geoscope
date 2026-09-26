@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { DataSource } from './data';
 
 // DetIds from the Fireworks reco geometry (tools/detids.mjs), matched to sim parts by
 // position: the nearest DetId centre to a part's centre. Approximate by nature.
@@ -26,7 +27,7 @@ export class DetIds {
   private grid = new Map<number, number[]>();
 
   static async load(base: string) {
-    return new DetIds(await (await fetch(`${base}/detids.bin`)).arrayBuffer());
+    return new DetIds(await DataSource.for(base).buffer('detids.bin'));
   }
 
   /** from the layout written by tools/detids.mjs: uint32 id, float32 x, y, z (m) per DetId */

@@ -1,3 +1,5 @@
+import { DataSource } from './data';
+
 // Full TGeo placement hierarchy written by tools/convert.mjs: every node in depth-first
 // preorder, so a node's subtree is the contiguous range [pl, end(pl)).
 
@@ -37,10 +39,8 @@ export class PlacementTree {
   private placementsOf?: Uint32Array;
 
   static async load(base: string) {
-    const [json, buf] = await Promise.all([
-      fetch(`${base}/tree.json`).then((r) => r.json() as Promise<TreeJson>),
-      fetch(`${base}/tree.bin`).then((r) => r.arrayBuffer()),
-    ]);
+    const src = DataSource.for(base);
+    const [json, buf] = await Promise.all([src.json<TreeJson>('tree.json'), src.buffer('tree.bin')]);
     return new PlacementTree(json, buf);
   }
 

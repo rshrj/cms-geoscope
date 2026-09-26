@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { DataSource } from './data';
 import { Looks, groupStyle } from './looks';
 import type { PlacementTree } from './tree';
 
@@ -222,12 +223,13 @@ export class Detector {
   private visible = new Set<string>();
 
   async load(base: string, onProgress: (done: number, total: number, label: string) => void) {
-    this.manifest = await (await fetch(`${base}/manifest.json`)).json();
+    const src = DataSource.for(base);
+    this.manifest = await src.json<Manifest>('manifest.json');
     const total = this.manifest.groups.reduce((a, g) => a + g.bytes, 0);
     let done = 0;
     for (const g of this.manifest.groups) {
       onProgress(done, total, g.label);
-      const buf = await (await fetch(`${base}/${g.file}`)).arrayBuffer();
+      const buf = await src.buffer(g.file);
       this.build(g, buf);
       done += g.bytes;
       if (!groupStyle(g.id).hidden) this.visible.add(g.id);
