@@ -1,19 +1,58 @@
-# cms-geoscope
+<p align="center">
+  <a href="https://cms-geoscope.rishiraj.ch"><img src="docs/images/banner.svg" alt="cms-geoscope: explore the CMS Phase-2 detector in 3D" width="100%"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/rshrj/cms-geoscope/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/rshrj/cms-geoscope/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://cms-geoscope.rishiraj.ch"><img alt="Live demo" src="https://img.shields.io/badge/demo-live-brightgreen"></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/rshrj/cms-geoscope"></a>
+  <a href="https://github.com/rshrj/cms-geoscope/commits/main"><img alt="Last commit" src="https://img.shields.io/github/last-commit/rshrj/cms-geoscope"></a>
+  <a href="https://github.com/rshrj/cms-geoscope/issues"><img alt="Open issues" src="https://img.shields.io/github/issues/rshrj/cms-geoscope"></a>
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-6.0-3178c6?logo=typescript&logoColor=white">
+  <img alt="three.js" src="https://img.shields.io/badge/three.js-r186-000000?logo=threedotjs&logoColor=white">
+  <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen"></a>
+</p>
+
+<p align="center">
+  <b><a href="https://cms-geoscope.rishiraj.ch">Live demo</a></b> &nbsp;|&nbsp;
+  <a href="#features">Features</a> &nbsp;|&nbsp;
+  <a href="#quick-start">Quick start</a> &nbsp;|&nbsp;
+  <a href="#exporting-the-geometry">Geometry export</a> &nbsp;|&nbsp;
+  <a href="#how-it-works">How it works</a> &nbsp;|&nbsp;
+  <a href="#roadmap">Roadmap</a> &nbsp;|&nbsp;
+  <a href="CONTRIBUTING.md">Contributing</a>
+</p>
+
+An interactive 3D model of the **CMS Phase-2 detector** (Run 4, scenario D127), built from
+the CMSSW simulation geometry. Open it, cut the detector open, pick out a subsystem, click any
+part to see what it is made of and where it sits, or search for a volume by name. It runs
+entirely in the browser with [three.js](https://threejs.org); there is no server component.
 
 > **Not an official CMS tool.** This is an independent project. It is not developed, endorsed or
 > maintained by the CMS Collaboration or CERN. It reads publicly available CMSSW geometry
 > descriptions and has not been validated against CMS's own detector displays.
 
-**Live demo: https://cms-geoscope.rishiraj.ch**
+<p align="center">
+  <a href="https://cms-geoscope.rishiraj.ch"><img src="docs/images/overview.jpg" alt="The CMS Phase-2 detector with a quarter cut away" width="100%"></a>
+</p>
 
-An interactive 3D viewer for the CMS Phase-2 detector (Run 4, scenario D127), built from
-the CMSSW simulation geometry. It runs in the browser with three.js; there is no server
-component.
+## Features
 
-Features: cutaway modes, per-subsystem visibility and isolation, click and hover to
-inspect a part (material, position, shape, placement path, matching reco DetId),
-fuzzy search, distance measurement, a Full / Balanced / Fast detail setting, and view
-links that reproduce the camera, cut, visibility and measurements.
+- **Cutaways:** closed, quarter, half or octant, with cut faces shaded as solid material.
+- **Subsystems:** toggle each one, or press "only" to keep just that subsystem and add more back.
+- **Isolation:** show one part with everything inside it, every copy of a volume, or a whole subsystem.
+- **Inspector:** click or hover a part for its material, density, position (r, z, η, φ), shape,
+  number of copies and full placement path, plus the nearest reco DetId.
+- **Search:** fuzzy search over about 26,000 volume names, including the familiar TBPX, TFPX and TEPX names.
+- **Measure:** click two points for the distance, its x/y/z parts and the change in radius.
+- **Share links:** the address bar always holds the exact view (camera, cut, visibility, isolation,
+  measurements), so any link reproduces it.
+- **Detail levels:** Full, Balanced and Fast, to trade image quality for speed on lighter machines.
+- **Fast:** the 2.4 million placements are drawn with GPU instancing and merged meshes, and the served data is gzip-compressed (298 MB down to 79 MB).
+
+<p align="center">
+  <img src="docs/images/inspect.jpg" alt="Inspecting an HGCAL wafer: material, position, shape and placement path" width="100%">
+</p>
 
 ## Quick start
 
@@ -63,78 +102,16 @@ inside the VM, and the `reco` products also read the conditions database.
 | `-g` | geometry scenario                                     | `D127`                         |
 | `-p` | products, comma separated: `sim`, `reco`, `tgeo-reco` | all three                      |
 
-| Product     | File                                         | Used for                         |
-| ----------- | -------------------------------------------- | -------------------------------- |
-| `sim`       | `cmsSimGeom-Run4<GEOM>.root`                 | the 3D model (required)          |
-| `reco`      | `cmsRecoGeom-Run4<GEOM>.root` (about 170 MB) | DetId lookup                     |
-| `tgeo-reco` | `cmsTGeoRecoGeom-Run4<GEOM>.root`            | not used; it lacks HGCAL and MTD |
-
-**Known messages.** "MEN geometry not found" is expected, because ME0 is not part of D127.
-The `tgeo-reco` log contains a couple of hundred TGeoArb8 warnings about ECAL crystals and
-empty containers; they are a known limitation of that producer, not a failed run.
-
-**Release rotation.** The aarch64 releases are nightly builds that disappear from CVMFS after
-about two weeks, so the pinned default will eventually stop working. Pick a current one with
-`-r`, and update the default in `cmssw/export-geometry.sh`.
-
-### Without the CMSSW VM
-
-If you do not use the VM and have CMSSW some other way (lxplus, CVMFS, a container), you only need two files
-in `geometry/`. From any CMSSW release that includes the Fireworks geometry dumps, run:
-
-```sh
-cd $CMSSW_RELEASE_BASE/src/Fireworks/Geometry/python
-cmsRun dumpSimGeometry_cfg.py  tag=Run4 version=D127 out=cmsSimGeom-Run4D127.root
-cmsRun dumpRecoGeometry_cfg.py tag=Run4 version=D127 tgeo=False out=cmsRecoGeom-Run4D127.root
-```
-
-and copy the two ROOT files into `geometry/`. The simulation file (about 3 MB) is
-required by `npm run convert`; the reco file (about 170 MB) is only used by
-`npm run detids` for the DetId lookup. Without it, run `npm run convert` instead of
-`npm run data`; the viewer then just shows no DetIds. Recent CMSSW
-releases have not been checked beyond the pinned nightly in `cmssw/export-geometry.sh`.
-
-## Controls
-
-| Input                     | Action                                                          |
-| ------------------------- | --------------------------------------------------------------- |
-| Drag / right-drag / wheel | Orbit / pan / zoom                                              |
-| Click                     | Select a part; double-click or `F` frames it                    |
-| `Esc`                     | Leave measuring, then clear selection, then leave isolation     |
-| `1`–`5`, `R`              | Camera views; `R` returns to the overview                       |
-| `/`                       | Search volume names (also matches TBPX, TFPX, TEPX, TBPS, TB2S) |
-| `M`, `C`                  | Toggle measuring; clear measurements                            |
-
-The address bar always holds the current view, and **Share link** copies it.
-
-## How it works
-
-```
-CMSSW (VM)  ->  geometry/*.root  ->  tools/convert.mjs  ->  public/data  ->  src/ (three.js)
-                                      tools/detids.mjs
-```
-
-- `cmssw/` — `export-geometry.sh` runs the stock Fireworks dump configs in a clean SCRAM
-  area inside the [cmssw-workspace](https://github.com/rshrj/cmssw-workspace) VM and copies
-  the ROOT files to `geometry/`. `manifest.txt` there records the release, global tag and
-  file hashes. Edit `RELEASE` when the pinned nightly rotates off CVMFS.
-- `tools/convert.mjs` — reads the TGeo geometry with JSROOT, tessellates each volume once,
-  and writes per-subsystem binaries. Volumes with at least 200 copies are GPU-instanced,
-  rarer ones are merged into shared meshes. It also writes the full placement tree.
-- `tools/detids.mjs` — extracts DetId centres from the reco geometry (HGCAL cells omitted).
-- `tools/tree.mjs <volume> [depth] [children]` — prints a subtree with shapes and
-  materials, for adjusting the subsystem rules in `convert.mjs`.
-- `src/` — the viewer:
-
-| File                                               | Role                                                      |
-| -------------------------------------------------- | --------------------------------------------------------- |
-| `main.ts`                                          | Renderer, camera, controls, wiring                        |
-| `detector.ts`                                      | Loads the data, builds meshes, applies cuts and isolation |
-| `looks.ts`                                         | Subsystem colours and materials, cut-cap shader           |
-| `tree.ts`                                          | Placement tree (paths, subtrees, copy counts)             |
-| `picker.ts`                                        | CPU ray picking                                           |
-| `inspector.ts`, `ui.ts`                            | Info card and side panel                                  |
-| `search.ts`, `measure.ts`, `share.ts`, `detids.ts` | Search, measuring, view links, DetId lookup               |
+| Product | File | Role |
+| ---------------------------------------------------------- | ---------------------------------------------------------- |
+| `main.ts` | Assembles the app and runs the render loop |
+| `stage.ts`, `views.ts`, `quality.ts` | Renderer and post-processing, camera flights, detail levels |
+| `input.ts`, `link.ts` | Mouse and keyboard, address-bar sync |
+| `data.ts` | Fetches and unpacks the (compressed) data files |
+| `detector.ts` | Builds meshes, applies cuts and isolation |
+| `looks.ts` | Subsystem colours and materials, cut-cap shader |
+| `tree.ts`, `picker.ts`, `inspector.ts`, `ui.ts` | Placement tree, CPU ray picking, info card, side panel |
+| `search.ts`, `measure.ts`, `share.ts`, `detids.ts` | Search, measuring, view links, DetId lookup |
 
 ## Development
 
@@ -175,12 +152,24 @@ because they need no new data. Small ones are labelled
 [`good first issue`](https://github.com/rshrj/cms-geoscope/labels/good%20first%20issue).
 Ideas and requests are welcome.
 
-## License
-
-MIT, see [LICENSE](LICENSE).
-
 ## Known limits
 
 - The DetId shown for a part is the nearest reco element by position, not an exact link.
 - HGCAL cells are not in the DetId table.
 - The viewer draws the simulation geometry only; the reco TGeo file is not used.
+
+## Contributing
+
+Bug reports, ideas and pull requests are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md). Good
+places to start are the issues labelled
+[`good first issue`](https://github.com/rshrj/cms-geoscope/labels/good%20first%20issue).
+
+## Acknowledgements
+
+Built on the shoulders of [CMSSW](https://github.com/cms-sw/cmssw) and its Fireworks geometry dumps,
+[JSROOT](https://github.com/root-project/jsroot) for reading ROOT files, [three.js](https://threejs.org),
+[N8AO](https://github.com/N8python/n8ao) for ambient occlusion, and [Vite](https://vite.dev).
+
+## License
+
+[MIT](LICENSE) &copy; 2026 Rishi Raj
