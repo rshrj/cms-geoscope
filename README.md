@@ -28,10 +28,56 @@ produce the ROOT files, run `npm run export-geometry`, which drives CMSSW in a V
 (see [Exporting the geometry](#exporting-the-geometry)). `npm run build` followed by
 `npm run preview` serves the compiled app.
 
+## Exporting the geometry
+
+The viewer reads ROOT files produced by CMSSW's Fireworks geometry dumps. They are not in
+the repository, so you generate them once (about 1.5 minutes plus a first-time setup).
+
+```sh
+npm run export-geometry                          # D127, all three products
+cmssw/export-geometry.sh -g D110 -p sim          # another scenario, sim file only
+cmssw/export-geometry.sh -r CMSSW_20_1_X_2026-09-25-2300   # another release
+```
+
+**Requirements.** The script expects the [cmssw-workspace](https://github.com/rshrj/cmssw-workspace)
+Lima VM to be running (`cmsvm shell` opens it), reachable over ssh as `lima-cmssw`. To use
+a differently named instance, set `CMSSW_LIMA_INSTANCE`. It needs network access to CVMFS
+inside the VM, and the `reco` products also read the conditions database.
+
+**What it does.**
+
+1. Builds a pristine SCRAM area for the release at `~/work/geom-export/<release>` in the VM.
+   It refuses to run in an area that has checked-out packages, so results always come from
+   the stock release. Nothing else in the VM is touched.
+2. Runs the stock `dumpSimGeometry_cfg.py` and `dumpRecoGeometry_cfg.py` configs.
+3. Copies the results into `geometry/`, together with logs and a `manifest.txt` that records
+   the release, architecture, global tag, file sizes and hashes, and the number of
+   error lines per log.
+
+| Flag | Meaning                                               | Default                        |
+| ---- | ----------------------------------------------------- | ------------------------------ |
+| `-r` | CMSSW release                                         | `CMSSW_20_1_X_2026-09-13-2300` |
+| `-a` | SCRAM architecture                                    | `el9_aarch64_gcc14`            |
+| `-g` | geometry scenario                                     | `D127`                         |
+| `-p` | products, comma separated: `sim`, `reco`, `tgeo-reco` | all three                      |
+
+| Product     | File                                         | Used for                         |
+| ----------- | -------------------------------------------- | -------------------------------- |
+| `sim`       | `cmsSimGeom-Run4<GEOM>.root`                 | the 3D model (required)          |
+| `reco`      | `cmsRecoGeom-Run4<GEOM>.root` (about 170 MB) | DetId lookup                     |
+| `tgeo-reco` | `cmsTGeoRecoGeom-Run4<GEOM>.root`            | not used; it lacks HGCAL and MTD |
+
+**Known messages.** "MEN geometry not found" is expected, because ME0 is not part of D127.
+The `tgeo-reco` log contains a couple of hundred TGeoArb8 warnings about ECAL crystals and
+empty containers; they are a known limitation of that producer, not a failed run.
+
+**Release rotation.** The aarch64 releases are nightly builds that disappear from CVMFS after
+about two weeks, so the pinned default will eventually stop working. Pick a current one with
+`-r`, and update the default in `cmssw/export-geometry.sh`.
+
 ### Without the CMSSW VM
 
-`npm run export-geometry` assumes the [cmssw-workspace](https://github.com/rshrj/cmssw-workspace)
-VM. If you have CMSSW some other way (lxplus, CVMFS, a container), you only need two files
+If you do not use the VM and have CMSSW some other way (lxplus, CVMFS, a container), you only need two files
 in `geometry/`. From any CMSSW release that includes the Fireworks geometry dumps, run:
 
 ```sh
