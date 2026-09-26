@@ -5,3 +5,4 @@ geometry/*.root
 geometry/*.log
 .DS_Store
 *.local
+.vercel
