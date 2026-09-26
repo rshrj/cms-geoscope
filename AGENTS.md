@@ -49,6 +49,9 @@ assuming a bug. `convert` needs an 8 GB heap (already in the script).
   context lost). Picking is CPU ray casting in `picker.ts`.
 - **Post-processing:** N8AO renders the scene itself, so Fast mode swaps in a plain `RenderPass`
   or draws straight to the canvas. Its noise seed is pinned in `stage.ts` to stop flicker; keep that.
+- **Data loading** goes through `src/data.ts` (`DataSource`): deployed builds hold `*.gz` plus
+  `compressed.json` (made by `tools/compress.mjs` as the last `build` step); dev serves raw files.
+  Never `fetch` data files directly. The loader tolerates servers that already decode `.gz`.
 - **Depth range** is refitted every frame in `main.ts` (a fixed near/far z-fights).
 - **View state** lives in the URL hash (`share.ts`, synced by `link.ts`). New user-visible state
   should be added there, with a test in `tests/share.test.ts`.

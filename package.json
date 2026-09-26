@@ -9,7 +9,9 @@
     "data": "npm run convert && npm run detids",
     "dev": "vite",
     "typecheck": "tsc",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build && node tools/compress.mjs dist/data",
+    "verify-build": "node tools/compress.mjs --verify dist/data",
+    "deploy": "npm run build && npm run verify-build && npx vercel deploy dist --prod",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -26,6 +28,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.4",
     "@types/three": "^0.186.0",
     "eslint": "^10.11.0",
     "eslint-config-prettier": "^10.1.8",
