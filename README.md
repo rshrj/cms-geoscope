@@ -4,6 +4,8 @@
 > maintained by the CMS Collaboration or CERN. It reads publicly available CMSSW geometry
 > descriptions and has not been validated against CMS's own detector displays.
 
+**Live demo: https://cms-geoscope.rishiraj.ch**
+
 An interactive 3D viewer for the CMS Phase-2 detector (Run 4, scenario D127), built from
 the CMSSW simulation geometry. It runs in the browser with three.js; there is no server
 component.
@@ -160,7 +162,8 @@ npm run deploy         # build, verify, then upload dist/ with the Vercel CLI (f
 ```
 
 The data is generated on your machine and is not in the repository, so deploys are made from
-a local build rather than by CI. Any other static host works the same way: upload `dist/`.
+a local build rather than by CI. The live site is a Vercel project with its Git integration
+turned off on purpose: a build from the repository has no data and would break the site. Any other static host works the same way: upload `dist/`.
 Because the browser decompresses the files itself, the host does not need to compress them.
 
 ## Roadmap

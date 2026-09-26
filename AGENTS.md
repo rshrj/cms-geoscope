@@ -68,6 +68,13 @@ assuming a bug. `convert` needs an 8 GB heap (already in the script).
 - Add tests for pure logic (parsing, scoring, maths). WebGL code is verified by running it.
 - To check UI changes, build, preview, and look at it in a browser; type checks do not cover rendering.
 
+## Deploying
+
+Production is `https://cms-geoscope.rishiraj.ch` (Vercel project `cms-geoscope`, DNS on Cloudflare).
+Deploy only with `npm run deploy` (or `deploy:preview`) from a machine that has `public/data`;
+the project's Git integration is disconnected because a repository build has no data and would
+replace the site with a broken one. Do not reconnect it or push `dist/` anywhere else.
+
 ## Git
 
 - Commit only when asked. Commits are GPG-signed (`commit.gpgsign` is on) with author
