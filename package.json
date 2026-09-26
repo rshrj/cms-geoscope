@@ -41,5 +41,13 @@
     "node": ">=22"
   },
   "author": "Rishi Raj <me@rishiraj.ch>",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rshrj/cms-geoscope.git"
+  },
+  "homepage": "https://github.com/rshrj/cms-geoscope#readme",
+  "bugs": {
+    "url": "https://github.com/rshrj/cms-geoscope/issues"
+  }
 }
