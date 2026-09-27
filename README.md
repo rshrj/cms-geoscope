@@ -143,6 +143,7 @@ releases have not been checked beyond the pinned nightly in `cmssw/export-geomet
 | `1`–`5`, `R`              | Camera views; `R` returns to the overview                       |
 | `/`                       | Search volume names (also matches TBPX, TFPX, TEPX, TBPS, TB2S) |
 | `M`, `C`                  | Toggle measuring; clear measurements                            |
+| `?`                       | Show all keyboard shortcuts                                     |
 
 The address bar always holds the current view, and **Share link** copies it.
 
