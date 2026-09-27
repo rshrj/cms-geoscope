@@ -55,6 +55,8 @@ assuming a bug. `convert` needs an 8 GB heap (already in the script).
 - **Depth range** is refitted every frame in `main.ts` (a fixed near/far z-fights).
 - **View state** lives in the URL hash (`share.ts`, synced by `link.ts`). New user-visible state
   should be added there, with a test in `tests/share.test.ts`.
+- **Shortcuts** are listed in `src/shortcuts.ts` (the `?` overlay); add new keys there too. A test
+  checks the list against `input.ts` and `search.ts`.
 - **Search aliases** (TBPX, TFPX, TEPX, TBPS, TB2S) are a hand-made map in `search.ts`
   (`aliases`): the sim geometry has no such names. TFPX is `ITDisc1-8`, TEPX `ITDisc9-12`.
 - **DetIds** shown on parts are the nearest reco centre by position, not an exact link.

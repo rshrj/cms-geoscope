@@ -8,6 +8,7 @@ import { Measure } from './measure';
 import { Picker } from './picker';
 import { createQuality, isQuality } from './quality';
 import { Search } from './search';
+import { createShortcutHelp } from './shortcuts';
 import { decode, type ViewState } from './share';
 import { createStage } from './stage';
 import { PlacementTree } from './tree';
@@ -119,6 +120,7 @@ await det.load('data', progress);
 if (initial.on) det.setVisibleGroups(initial.on);
 if (initial.quality && isQuality(initial.quality)) quality.set(initial.quality);
 
+const help = createShortcutHelp();
 const share = bindLink(
   (): ViewState => ({
     cam: [...camera.position.toArray(), ...controls.target.toArray()],
@@ -142,6 +144,7 @@ const share = bindLink(
   onQuality: (q) => {
     if (isQuality(q)) quality.set(q);
   },
+  onHelp: () => help.toggle(),
   onShare: (b) => {
     b.onclick = () => share(b);
   },

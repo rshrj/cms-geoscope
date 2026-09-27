@@ -9,6 +9,7 @@ export interface UiHandlers {
   onQuality(q: string): void;
   onMeasure(b: HTMLElement): void;
   onShare(b: HTMLElement): void;
+  onHelp(): void;
   quality?: string;
 }
 
@@ -122,7 +123,10 @@ export function buildPanel(det: Detector, h: UiHandlers) {
   share.title = 'Copy a link to this exact view';
   h.onShare(share);
   const btns = el('div', 'chips');
-  btns.append(share, shot);
+  const help = el('button', undefined, '?');
+  help.title = 'Keyboard shortcuts (?)';
+  help.onclick = h.onHelp;
+  btns.append(share, shot, help);
   foot.append(stats, btns);
 
   panel.replaceChildren(head, cut, quality, views, groups, foot);

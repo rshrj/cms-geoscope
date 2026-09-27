@@ -539,3 +539,76 @@ button.on {
 .hint.loading {
   overflow: hidden;
 }
+
+.shortcuts {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+  background: rgba(5, 7, 11, 0.55);
+  backdrop-filter: blur(4px);
+}
+.shortcuts.open {
+  display: flex;
+}
+.shortcuts .card {
+  width: min(460px, calc(100% - 32px));
+  max-height: calc(100% - 48px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding: 16px 20px 18px;
+  background: var(--panel);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  font-size: 12.5px;
+}
+.shortcuts .head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.shortcuts .head h2 {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.shortcuts .close {
+  background: none;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0 6px;
+  color: var(--muted);
+}
+.shortcuts dl {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 6px 12px;
+  margin: 0;
+  align-items: baseline;
+}
+.shortcuts dt {
+  color: var(--muted);
+}
+.shortcuts dd {
+  margin: 0;
+}
+.shortcuts kbd {
+  display: inline-block;
+  min-width: 22px;
+  padding: 1px 6px;
+  text-align: center;
+  border-radius: 4px;
+  font:
+    500 11.5px ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.1);
+}
