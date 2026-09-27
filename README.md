@@ -102,16 +102,79 @@ inside the VM, and the `reco` products also read the conditions database.
 | `-g` | geometry scenario                                     | `D127`                         |
 | `-p` | products, comma separated: `sim`, `reco`, `tgeo-reco` | all three                      |
 
-| Product | File | Role |
-| ---------------------------------------------------------- | ---------------------------------------------------------- |
-| `main.ts` | Assembles the app and runs the render loop |
-| `stage.ts`, `views.ts`, `quality.ts` | Renderer and post-processing, camera flights, detail levels |
-| `input.ts`, `link.ts` | Mouse and keyboard, address-bar sync |
-| `data.ts` | Fetches and unpacks the (compressed) data files |
-| `detector.ts` | Builds meshes, applies cuts and isolation |
-| `looks.ts` | Subsystem colours and materials, cut-cap shader |
-| `tree.ts`, `picker.ts`, `inspector.ts`, `ui.ts` | Placement tree, CPU ray picking, info card, side panel |
-| `search.ts`, `measure.ts`, `share.ts`, `detids.ts` | Search, measuring, view links, DetId lookup |
+| Product     | File                                         | Used for                         |
+| ----------- | -------------------------------------------- | -------------------------------- |
+| `sim`       | `cmsSimGeom-Run4<GEOM>.root`                 | the 3D model (required)          |
+| `reco`      | `cmsRecoGeom-Run4<GEOM>.root` (about 170 MB) | DetId lookup                     |
+| `tgeo-reco` | `cmsTGeoRecoGeom-Run4<GEOM>.root`            | not used; it lacks HGCAL and MTD |
+
+**Known messages.** "MEN geometry not found" is expected, because ME0 is not part of D127.
+The `tgeo-reco` log contains a couple of hundred TGeoArb8 warnings about ECAL crystals and
+empty containers; they are a known limitation of that producer, not a failed run.
+
+**Release rotation.** The aarch64 releases are nightly builds that disappear from CVMFS after
+about two weeks, so the pinned default will eventually stop working. Pick a current one with
+`-r`, and update the default in `cmssw/export-geometry.sh`.
+
+### Without the CMSSW VM
+
+If you do not use the VM and have CMSSW some other way (lxplus, CVMFS, a container), you only need two files
+in `geometry/`. From any CMSSW release that includes the Fireworks geometry dumps, run:
+
+```sh
+cd $CMSSW_RELEASE_BASE/src/Fireworks/Geometry/python
+cmsRun dumpSimGeometry_cfg.py  tag=Run4 version=D127 out=cmsSimGeom-Run4D127.root
+cmsRun dumpRecoGeometry_cfg.py tag=Run4 version=D127 tgeo=False out=cmsRecoGeom-Run4D127.root
+```
+
+and copy the two ROOT files into `geometry/`. The simulation file (about 3 MB) is
+required by `npm run convert`; the reco file (about 170 MB) is only used by
+`npm run detids` for the DetId lookup. Without it, run `npm run convert` instead of
+`npm run data`; the viewer then just shows no DetIds. Recent CMSSW
+releases have not been checked beyond the pinned nightly in `cmssw/export-geometry.sh`.
+
+## Controls
+
+| Input                     | Action                                                          |
+| ------------------------- | --------------------------------------------------------------- |
+| Drag / right-drag / wheel | Orbit / pan / zoom                                              |
+| Click                     | Select a part; double-click or `F` frames it                    |
+| `Esc`                     | Leave measuring, then clear selection, then leave isolation     |
+| `1`–`5`, `R`              | Camera views; `R` returns to the overview                       |
+| `/`                       | Search volume names (also matches TBPX, TFPX, TEPX, TBPS, TB2S) |
+| `M`, `C`                  | Toggle measuring; clear measurements                            |
+
+The address bar always holds the current view, and **Share link** copies it.
+
+## How it works
+
+```
+CMSSW (VM)  ->  geometry/*.root  ->  tools/convert.mjs  ->  public/data  ->  src/ (three.js)
+                                      tools/detids.mjs
+```
+
+- `cmssw/` — `export-geometry.sh` runs the stock Fireworks dump configs in a clean SCRAM
+  area inside the [cmssw-workspace](https://github.com/rshrj/cmssw-workspace) VM and copies
+  the ROOT files to `geometry/`. `manifest.txt` there records the release, global tag and
+  file hashes. Edit `RELEASE` when the pinned nightly rotates off CVMFS.
+- `tools/convert.mjs` — reads the TGeo geometry with JSROOT, tessellates each volume once,
+  and writes per-subsystem binaries. Volumes with at least 200 copies are GPU-instanced,
+  rarer ones are merged into shared meshes. It also writes the full placement tree.
+- `tools/detids.mjs` — extracts DetId centres from the reco geometry (HGCAL cells omitted).
+- `tools/tree.mjs <volume> [depth] [children]` — prints a subtree with shapes and
+  materials, for adjusting the subsystem rules in `convert.mjs`.
+- `src/` — the viewer:
+
+| File                                               | Role                                                        |
+| -------------------------------------------------- | ----------------------------------------------------------- |
+| `main.ts`                                          | Assembles the app and runs the render loop                  |
+| `stage.ts`, `views.ts`, `quality.ts`               | Renderer and post-processing, camera flights, detail levels |
+| `input.ts`, `link.ts`                              | Mouse and keyboard, address-bar sync                        |
+| `data.ts`                                          | Fetches and unpacks the (compressed) data files             |
+| `detector.ts`                                      | Builds meshes, applies cuts and isolation                   |
+| `looks.ts`                                         | Subsystem colours and materials, cut-cap shader             |
+| `tree.ts`, `picker.ts`, `inspector.ts`, `ui.ts`    | Placement tree, CPU ray picking, info card, side panel      |
+| `search.ts`, `measure.ts`, `share.ts`, `detids.ts` | Search, measuring, view links, DetId lookup                 |
 
 ## Development
 
