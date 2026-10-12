@@ -9,7 +9,7 @@
 # Nothing outside ~/work/geom-export is touched in the VM.
 set -euo pipefail
 
-RELEASE=CMSSW_20_1_X_2026-09-13-2300 # pinned like cmssw-workspace's smoke test
+RELEASE=CMSSW_20_1_0_pre3 # a full release: nightlies rotate off CVMFS after about two weeks
 ARCH=el9_aarch64_gcc14
 GEOM=D127
 PRODUCTS=sim,reco,tgeo-reco
