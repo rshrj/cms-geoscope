@@ -50,12 +50,11 @@ export function createFlight({ camera, controls }: Pick<Stage, 'camera' | 'contr
     flyTo(new THREE.Vector3(...p), new THREE.Vector3(...t), instant);
   }
 
-  /** keep the viewing direction and back off until the sphere fits the narrower fov */
-  function frame(sphere: THREE.Sphere) {
+  /** back off along `dir` (default: the current view) until the sphere fits the narrower fov */
+  function frame(sphere: THREE.Sphere, dir = camera.position.clone().sub(controls.target).normalize()) {
     const vfov = THREE.MathUtils.degToRad(camera.fov),
       hfov = 2 * Math.atan(Math.tan(vfov / 2) * camera.aspect);
     const dist = (Math.max(sphere.radius, 0.02) / Math.sin(Math.min(vfov, hfov) / 2)) * 1.1;
-    const dir = camera.position.clone().sub(controls.target).normalize();
     flyTo(sphere.center.clone().addScaledVector(dir, dist), sphere.center);
   }
 

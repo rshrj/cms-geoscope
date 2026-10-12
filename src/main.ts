@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { DetIds } from './detids';
-import { Detector, type Isolation } from './detector';
+import { DetIds, bestPart, groupsOf } from './detids';
+import { Detector, type CutMode, type Isolation } from './detector';
 import { Inspector } from './inspector';
 import { bindInput } from './input';
 import { bindLink } from './link';
@@ -39,6 +39,7 @@ const measure = new Measure(canvas, (on) => {
 scene.add(measure.group);
 
 let beforeIsolation: [THREE.Vector3, THREE.Vector3] | null = null;
+let cutBeforeIsolation: CutMode | null = null; // set when a DetId search opened the cutaway
 function isolate(iso: Isolation) {
   beforeIsolation ??= [camera.position.clone(), controls.target.clone()];
   det.setIsolation(iso);
@@ -50,6 +51,8 @@ function exitIsolation() {
   showIsolation(null, 0, exitIsolation);
   if (beforeIsolation) flight.flyTo(...beforeIsolation);
   beforeIsolation = null;
+  if (cutBeforeIsolation) panel.setCut(cutBeforeIsolation);
+  cutBeforeIsolation = null;
 }
 det.onChange = () => {
   if (det.isolation) showIsolation(det.isolation, det.shownItems, exitIsolation);
@@ -133,7 +136,7 @@ const share = bindLink(
   () => flight.flying,
 );
 
-({ stats } = buildPanel(det, {
+const panel = buildPanel(det, {
   onCut: (mode) => {
     det.setCut(mode);
     inspector.syncSide();
@@ -155,9 +158,13 @@ const share = bindLink(
   onSolo: () => {
     if (det.isolation) exitIsolation();
   },
-}));
+});
+({ stats } = panel);
 
-const search = new Search(document.querySelector('#panel header')!, (name, solid) => {
+const search = new Search(document.querySelector('#panel header')!, searchVolume, searchDetId);
+stage.resize(); // the panel now has its width
+
+function searchVolume(name: string, solid: boolean) {
   const label = `${name} (all copies)`;
   if (solid) return isolate({ kind: 'volume', name, label });
   // an assembly draws nothing itself: show everything placed inside any of its copies
@@ -171,8 +178,36 @@ const search = new Search(document.querySelector('#panel header')!, (name, solid
     }
   }
   if (ranges.length) isolate({ kind: 'subtree', from: ranges[0][0], to: ranges[0][1], ranges, label });
-});
-stage.resize(); // the panel now has its width
+}
+
+/**
+ * isolate and select the part standing for a DetId, as a volume search isolates its copies;
+ * the search only offers DetIds once they and the placement tree are loaded
+ */
+function searchDetId(id: number) {
+  // only parts of the DetId's own subsystem: an HO cell lies inside DT chamber parts too
+  const ids = inspector.detIds!,
+    groups = groupsOf(id),
+    parts = det.itemsAround(ids.centre(id)!).filter((p) => !groups || groups.includes(p.drawable.group)),
+    hit = bestPart(parts, id, ids, (p, at) => p.drawable.boxDistance(p.item, at));
+  if (!hit) return false;
+  const pl = hit.drawable.pl[hit.item];
+  // a part in or across the cut-away wedge would be hidden: close the cut while it is shown
+  const s = hit.sphere;
+  if (det.planes.length && det.planes.every((p) => p.distanceToPoint(s.center) < s.radius)) {
+    cutBeforeIsolation ??= det.cut;
+    panel.setCut('none');
+  }
+  isolate({ kind: 'subtree', from: pl, to: det.tree!.end(pl), label: `DetId ${id}` });
+  inspector.select({ drawable: hit.drawable, item: hit.item, detId: id });
+  // sensors and chambers are flat: view them face-on from the camera's side, slightly oblique
+  const sphere = det.bounds.getBoundingSphere(new THREE.Sphere()),
+    toCamera = camera.position.clone().sub(sphere.center).normalize(),
+    dir = hit.drawable.thinAxis(hit.item);
+  if (dir.dot(toCamera) < 0) dir.negate();
+  flight.frame(sphere, dir.addScaledVector(toCamera, 0.35).normalize());
+  return true;
+}
 
 const applyCamera = () => {
   if (initial.cam)
@@ -185,6 +220,7 @@ detIdLoad
   .then((ids) => {
     inspector.detIds = ids;
     inspector.render();
+    search.setDetIds(ids);
   })
   .catch(() => {});
 treeLoad.then((tree) => {

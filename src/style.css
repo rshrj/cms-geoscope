@@ -479,6 +479,11 @@ footer .stats {
 .results li.active {
   background: rgba(255, 255, 255, 0.09);
 }
+.results li.info {
+  cursor: default;
+  color: var(--muted);
+  background: none;
+}
 
 #measurements {
   position: fixed;

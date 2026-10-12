@@ -9,6 +9,8 @@ export interface Hit {
   drawable: Drawable;
   item: number;
   point?: THREE.Vector3;
+  /** set when the part was found by searching for this DetId */
+  detId?: number;
 }
 
 const _ray = new THREE.Ray();

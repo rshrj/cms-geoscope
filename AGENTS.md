@@ -59,7 +59,9 @@ assuming a bug. `convert` needs an 8 GB heap (already in the script).
   checks the list against `input.ts` and `search.ts`.
 - **Search aliases** (TBPX, TFPX, TEPX, TBPS, TB2S) are a hand-made map in `search.ts`
   (`aliases`): the sim geometry has no such names. TFPX is `ITDisc1-8`, TEPX `ITDisc9-12`.
-- **DetIds** shown on parts are the nearest reco centre by position, not an exact link.
+- **DetIds** shown on parts are the nearest reco centre by position, not an exact link. DetId
+  search (`bestPart` in `detids.ts`) goes the other way within the DetId's own subsystem
+  (`groupsOf`): first a part whose card would show that DetId, else the tightest bounding box.
 - **TypeScript is pinned to 6.0** because `typescript-eslint` does not support 7 yet.
 
 ## Conventions
