@@ -80,6 +80,7 @@ export class Drawable {
   selection = '';
   /** instanced: drawn slot -> instance index, as packed into instanceMatrix */
   slots?: Uint32Array;
+  private sphereCache?: Float32Array;
   constructor(
     readonly id: number,
     readonly object: THREE.Mesh,
@@ -138,6 +139,11 @@ export class Drawable {
       const s = this.object.geometry.boundingSphere!.clone();
       return s.applyMatrix4(this.matrix(item));
     }
+    return this.bakedBox(item).getBoundingSphere(new THREE.Sphere());
+  }
+
+  /** world bounding box of a baked part */
+  private bakedBox(item: number) {
     const pos = this.object.geometry.getAttribute('position'),
       idx = this.baked!.index.array;
     const box = new THREE.Box3(),
@@ -145,7 +151,72 @@ export class Drawable {
     const a = 3 * this.baked!.firstTri[item],
       b = a + 3 * this.baked!.tris[item];
     for (let i = a; i < b; i++) box.expandByPoint(v.fromBufferAttribute(pos, idx[i]));
-    return box.getBoundingSphere(new THREE.Sphere());
+    return box;
+  }
+
+  /**
+   * an item's bounding box in its own frame for instances, so a rotated bar keeps a tight
+   * box; baked parts only have a world box
+   */
+  private ownBox(item: number) {
+    if (!this.instanced) return this.bakedBox(item);
+    const g = this.object.geometry;
+    if (!g.boundingBox) g.computeBoundingBox();
+    return g.boundingBox!;
+  }
+
+  /** distance from p to an item's bounding box (0 inside) and the box volume */
+  boxDistance(item: number, p: THREE.Vector3) {
+    const box = this.ownBox(item),
+      q = this.instanced ? p.clone().applyMatrix4(this.matrix(item).invert()) : p,
+      s = box.getSize(new THREE.Vector3());
+    return { distance: box.distanceToPoint(q), volume: s.x * s.y * s.z };
+  }
+
+  /** world direction that shows an item face-on: its thinnest axis */
+  thinAxis(item: number) {
+    if (this.instanced) {
+      const s = this.ownBox(item).getSize(new THREE.Vector3()),
+        axis = new THREE.Vector3();
+      axis.setComponent(s.x <= s.y && s.x <= s.z ? 0 : s.y <= s.z ? 1 : 2, 1);
+      return axis.transformDirection(this.matrix(item));
+    }
+    // a baked part's world box is loose once rotated: use the normal of its biggest face
+    const pos = this.object.geometry.getAttribute('position'),
+      idx = this.baked!.index.array,
+      tri = new THREE.Triangle(),
+      normal = new THREE.Vector3(0, 0, 1);
+    let biggest = 0;
+    for (let t = this.baked!.firstTri[item], end = t + this.baked!.tris[item]; t < end; t++) {
+      tri.setFromAttributeAndIndices(pos, idx[3 * t], idx[3 * t + 1], idx[3 * t + 2]);
+      const area = tri.getArea();
+      if (area > biggest) {
+        biggest = area;
+        tri.getNormal(normal);
+      }
+    }
+    return normal;
+  }
+
+  /** every item's world bounding sphere as x, y, z, r; computed on first use */
+  spheres() {
+    if (this.sphereCache) return this.sphereCache;
+    const out = new Float32Array(4 * this.count);
+    if (this.instanced) {
+      // instance transforms are rigid, so only the centre moves
+      const bs = this.object.geometry.boundingSphere!,
+        m = new THREE.Matrix4(),
+        c = new THREE.Vector3();
+      for (let i = 0; i < this.count; i++) {
+        c.copy(bs.center).applyMatrix4(this.matrix(i, m));
+        out.set([c.x, c.y, c.z, bs.radius], 4 * i);
+      }
+    } else
+      for (let i = 0; i < this.count; i++) {
+        const s = this.itemSphere(i);
+        out.set([s.center.x, s.center.y, s.center.z, s.radius], 4 * i);
+      }
+    return (this.sphereCache = out);
   }
 }
 
@@ -496,6 +567,20 @@ export class Detector {
       pos = geo.getAttribute('position'),
       idx = geo.index!.array;
     for (let i = 0; i < idx.length; i++) box.expandByPoint(v.fromBufferAttribute(pos, idx[i]));
+  }
+
+  /** items whose bounding sphere contains p, drawn or not */
+  itemsAround(p: THREE.Vector3) {
+    const out: { drawable: Drawable; item: number; sphere: THREE.Sphere }[] = [];
+    for (const d of this.drawables) {
+      const s = d.spheres();
+      for (let i = 0; i < d.count; i++) {
+        const r = s[4 * i + 3];
+        if ((s[4 * i] - p.x) ** 2 + (s[4 * i + 1] - p.y) ** 2 + (s[4 * i + 2] - p.z) ** 2 > r * r) continue;
+        out.push({ drawable: d, item: i, sphere: new THREE.Sphere(new THREE.Vector3().fromArray(s, 4 * i), r) });
+      }
+    }
+    return out;
   }
 
   /** number of triangles currently submitted */

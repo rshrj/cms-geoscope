@@ -44,6 +44,8 @@ entirely in the browser with [three.js](https://threejs.org); there is no server
 - **Inspector:** click or hover a part for its material, density, position (r, z, η, φ), shape,
   number of copies and full placement path, plus the nearest reco DetId.
 - **Search:** fuzzy search over about 26,000 volume names, including the familiar TBPX, TFPX and TEPX names.
+  Type a DetId (decimal or `0x` hex) to isolate and select the part it belongs to; the cutaway
+  closes while that part is shown if it would hide it.
 - **Measure:** click two points for the distance, its x/y/z parts and the change in radius.
 - **Share links:** the address bar always holds the exact view (camera, cut, visibility, isolation,
   measurements), so any link reproduces it.
@@ -139,15 +141,15 @@ releases have not been checked beyond the one pinned in `cmssw/export-geometry.s
 
 ## Controls
 
-| Input                     | Action                                                          |
-| ------------------------- | --------------------------------------------------------------- |
-| Drag / right-drag / wheel | Orbit / pan / zoom                                              |
-| Click                     | Select a part; double-click or `F` frames it                    |
-| `Esc`                     | Leave measuring, then clear selection, then leave isolation     |
-| `1`–`5`, `R`              | Camera views; `R` returns to the overview                       |
-| `/`                       | Search volume names (also matches TBPX, TFPX, TEPX, TBPS, TB2S) |
-| `M`, `C`                  | Toggle measuring; clear measurements                            |
-| `?`                       | Show all keyboard shortcuts                                     |
+| Input                     | Action                                                            |
+| ------------------------- | ----------------------------------------------------------------- |
+| Drag / right-drag / wheel | Orbit / pan / zoom                                                |
+| Click                     | Select a part; double-click or `F` frames it                      |
+| `Esc`                     | Leave measuring, then clear selection, then leave isolation       |
+| `1`–`5`, `R`              | Camera views; `R` returns to the overview                         |
+| `/`                       | Search volume names (also TBPX, TFPX, TEPX, TBPS, TB2S) or DetIds |
+| `M`, `C`                  | Toggle measuring; clear measurements                              |
+| `?`                       | Show all keyboard shortcuts                                       |
 
 The address bar always holds the current view, and **Share link** copies it.
 
@@ -222,7 +224,9 @@ Ideas and requests are welcome.
 
 ## Known limits
 
-- The DetId shown for a part is the nearest reco element by position, not an exact link.
+- The DetId shown for a part is the nearest reco element by position, not an exact link. Searching
+  for a DetId goes the other way and finds the part around its centre; where a DetId is a readout
+  cell rather than a volume (HCAL, HF, RPC and GEM partitions), that is the enclosing layer or chamber.
 - HGCAL cells are not in the DetId table.
 - The viewer draws the simulation geometry only; the reco TGeo file is not used.
 

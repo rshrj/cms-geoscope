@@ -54,8 +54,9 @@ export function buildPanel(det: Detector, h: UiHandlers) {
     return row;
   };
 
-  const cut = el('section');
-  cut.append(el('h2', undefined, 'Cutaway'), segmented(CUTS, det.cut, h.onCut));
+  const cut = el('section'),
+    cutRow = segmented(CUTS, det.cut, h.onCut);
+  cut.append(el('h2', undefined, 'Cutaway'), cutRow);
 
   const QUALITY: [string, string][] = [
     ['high', 'Full'],
@@ -130,7 +131,9 @@ export function buildPanel(det: Detector, h: UiHandlers) {
   foot.append(stats, btns);
 
   panel.replaceChildren(head, cut, quality, views, groups, foot);
-  return { stats };
+  // change the cut as if its button were pressed, so the panel stays in step
+  const setCut = (mode: CutMode) => (cutRow.children[CUTS.findIndex(([m]) => m === mode)] as HTMLElement).click();
+  return { stats, setCut };
 }
 
 export function showIsolation(iso: Isolation | null, items: number, onExit: () => void) {
@@ -140,14 +143,15 @@ export function showIsolation(iso: Isolation | null, items: number, onExit: () =
     banner.classList.remove('open');
     return;
   }
-  const kind = { group: 'Subsystem', volume: 'Volume', subtree: 'Assembly' }[iso.kind];
+  const single = iso.kind === 'subtree' && !iso.ranges && iso.to - iso.from === 1,
+    kind = single ? 'Part' : { group: 'Subsystem', volume: 'Volume', subtree: 'Assembly' }[iso.kind];
   const exit = el('button', undefined, 'Show all');
   exit.title = 'Esc';
   exit.onclick = onExit;
   banner.replaceChildren(
     el('span', 'kind', kind),
     el('span', 'label', iso.label),
-    el('span', 'count', `${items.toLocaleString()} parts`),
+    el('span', 'count', `${items.toLocaleString()} ${items === 1 ? 'part' : 'parts'}`),
     exit,
   );
   banner.classList.add('open');

@@ -142,14 +142,19 @@ export class Inspector {
     rows.push(['Position', `${fmt(o.x)}, ${fmt(o.y)}, ${fmt(o.z)} m`]);
     rows.push(['r', `${fmt(r)} m`], ['z', `${fmt(o.z)} m`]);
     rows.push(['η', fmt(-Math.log(Math.tan(theta / 2)))], ['φ', `${fmt((Math.atan2(o.y, o.x) * 180) / Math.PI, 1)}°`]);
+    // a part found by DetId search keeps that DetId, even where another centre is nearer
     const sphere = d.itemSphere(item),
-      match = this.detIds?.nearest(sphere.center, 0.5 * sphere.radius + 0.02);
+      searched = hit.detId === undefined ? null : this.detIds?.centre(hit.detId),
+      match = searched
+        ? { id: hit.detId!, distance: searched.distanceTo(sphere.center) }
+        : this.detIds?.matchPart(sphere);
     if (match) {
-      const { detector, subdetector } = describeDetId(match.id);
+      const { detector, subdetector } = describeDetId(match.id),
+        off = `${fmt(match.distance * 1000, 1)} mm`;
       rows.push(
         ['DetId', `${match.id} (0x${match.id.toString(16)})`],
         ['Reco', `${detector}, ${subdetector}`],
-        ['Match', `nearest by position, ${fmt(match.distance * 1000, 1)} mm off`],
+        ['Match', searched ? `searched, ${off} from the part's centre` : `nearest by position, ${off} off`],
       );
     }
     if (tree) {

@@ -32,7 +32,7 @@ export const SHORTCUTS: ShortcutGroup[] = [
   {
     title: 'Tools',
     items: [
-      { keys: ['/'], action: 'Search volumes' },
+      { keys: ['/'], action: 'Search volumes or DetIds' },
       { keys: ['M'], action: 'Measure between two points' },
       { keys: ['C'], action: 'Clear measurements' },
       { keys: ['?'], action: 'Show or hide this help' },
