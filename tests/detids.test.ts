@@ -44,6 +44,16 @@ describe('describeDetId', () => {
     expect(describeDetId(((1 << 28) | (1 << 25)) >>> 0).subdetector).toContain('TBPX');
   });
 
+  it('names the Phase-2 outer tracker, which reuses the TID and TOB codes', () => {
+    expect(describeDetId(((1 << 28) | (4 << 25)) >>> 0).subdetector).toContain('TEDD');
+    expect(describeDetId(((1 << 28) | (5 << 25)) >>> 0).subdetector).toContain('TB2S');
+  });
+
+  it('tells BTL from ETL by the MTD subdetector bits', () => {
+    expect(describeDetId(((6 << 28) | (1 << 25) | (1 << 23)) >>> 0)).toEqual({ detector: 'MTD', subdetector: 'BTL' });
+    expect(describeDetId(((6 << 28) | (1 << 25) | (2 << 23)) >>> 0).subdetector).toBe('ETL');
+  });
+
   it('falls back to numbers for unknown codes', () => {
     expect(describeDetId(((1 << 28) | (6 << 25)) >>> 0).subdetector).toBe('subdet 6');
   });

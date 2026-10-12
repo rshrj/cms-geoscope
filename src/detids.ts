@@ -6,19 +6,26 @@ import { DataSource } from './data';
 
 const CELL = 0.05; // grid cell, m
 
-const DETECTORS = ['', 'Tracker', 'Muon', 'ECAL', 'HCAL', 'Calo', 'MTD'];
+// DetId::Detector codes (bits 28-31); HGCAL (8-11) is not in detids.bin
+const DETECTORS = ['', 'Tracker', 'Muon', 'ECAL', 'HCAL', 'Calo', 'MTD', '', 'HGCAL', 'HGCAL', 'HGCAL', 'HGCAL'];
 const SUBDET: Record<number, Record<number, string>> = {
-  1: { 1: 'TBPX (barrel pixel)', 2: 'TFPX/TEPX (forward pixel)' },
+  // the Phase-2 outer tracker reuses the TID (endcap) and TOB (barrel) codes
+  1: { 1: 'TBPX (barrel pixel)', 2: 'TFPX/TEPX (forward pixel)', 4: 'TEDD (OT endcap)', 5: 'TBPS/TB2S (OT barrel)' },
   2: { 1: 'DT', 2: 'CSC', 3: 'RPC', 4: 'GEM', 5: 'ME0' },
   3: { 1: 'EB', 2: 'EE', 3: 'ES' },
   4: { 1: 'HB', 2: 'HE', 3: 'HO', 4: 'HF' },
-  6: { 1: 'BTL', 2: 'ETL' },
+  5: { 1: 'calo tower', 2: 'ZDC' },
 };
 
 export function describeDetId(id: number) {
   const det = id >>> 28,
     sub = (id >>> 25) & 7;
-  return { detector: DETECTORS[det] ?? `det ${det}`, subdetector: SUBDET[det]?.[sub] ?? `subdet ${sub}` };
+  // MTD is Forward/FastTime (6/1); barrel or endcap sits in bits 23-24
+  const mtd = det === 6 && sub === 1 ? ['', 'BTL', 'ETL'][(id >>> 23) & 3] : '';
+  return {
+    detector: DETECTORS[det] || `det ${det}`,
+    subdetector: mtd || SUBDET[det]?.[sub] || `subdet ${sub}`,
+  };
 }
 
 export class DetIds {
