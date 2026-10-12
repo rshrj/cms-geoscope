@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Browser 3D viewer for the CMS Phase-2 (Run 4, D127) detector: three.js + Vite + TypeScript,
+Browser 3D viewer for the CMS Phase-2 (Run 4, D128) detector: three.js + Vite + TypeScript,
 fed by a JSROOT converter. Unofficial project, MIT. User docs are in `README.md`; the feature
 backlog is the GitHub issues (labels `physics`, `viewing`, `output`, `usability`, `geometries`).
 

@@ -5,7 +5,7 @@ import { openFile, treeProcess, TSelector } from 'jsroot';
 import { writeFileSync } from 'node:fs';
 
 const SKIP = new Set([8, 9, 10, 11, 12]); // HGCal EE / HSi / HSc / trigger
-const file = await openFile(process.argv[2] ?? 'geometry/cmsRecoGeom-Run4D127.root');
+const file = await openFile(process.argv[2] ?? 'geometry/cmsRecoGeom-Run4D128.root');
 const tree = await file.readObject('idToGeo;6');
 const ids = [],
   pos = [];
