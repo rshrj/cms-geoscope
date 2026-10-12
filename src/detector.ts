@@ -394,7 +394,7 @@ export class Detector {
         else d.object.visible = false;
       }
       if (!d.object.visible) continue;
-      const n = d.instanced ? (d.object as THREE.InstancedMesh).count : d.count;
+      const n = d.instanced ? (d.object as THREE.InstancedMesh).count : (d.object.userData.keptParts as number);
       shown += n;
       if (iso) this.expand(box, d, v);
     }
