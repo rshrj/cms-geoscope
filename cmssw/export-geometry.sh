@@ -1,7 +1,7 @@
 #!/bin/bash
 # Regenerate the CMS geometry ROOT files in the cmssw VM and copy them to ../geometry/.
 #
-#   cmssw/export-geometry.sh                        D127, all products
+#   cmssw/export-geometry.sh                        D128, all products
 #   cmssw/export-geometry.sh -g D110 -p sim         another scenario, sim only
 #   cmssw/export-geometry.sh -r CMSSW_20_1_X_2026-09-25-2300
 #
@@ -9,9 +9,9 @@
 # Nothing outside ~/work/geom-export is touched in the VM.
 set -euo pipefail
 
-RELEASE=CMSSW_20_1_X_2026-09-13-2300 # pinned like cmssw-workspace's smoke test
+RELEASE=CMSSW_20_1_0_pre3 # a full release: nightlies rotate off CVMFS after about two weeks
 ARCH=el9_aarch64_gcc14
-GEOM=D127
+GEOM=D128
 PRODUCTS=sim,reco,tgeo-reco
 while getopts r:a:g:p: o; do
   case $o in

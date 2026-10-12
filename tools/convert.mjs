@@ -1,7 +1,7 @@
 // Convert the CMS TGeo simulation geometry into compact per-subsystem binaries
 // for the web viewer.
 //
-//   node tools/convert.mjs [geometry/cmsSimGeom-Run4D127.root] [--out public/data] [--stats]
+//   node tools/convert.mjs [geometry/cmsSimGeom-Run4D128.root] [--out public/data] [--stats]
 //
 // Every placed volume made of a non-gaseous material is drawn. Placements are grouped
 // into "draws": one per (subsystem, volume, mirrored, occluder). Draws with many copies
@@ -28,7 +28,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 
 const args = process.argv.slice(2);
-const input = args.find((a) => a.endsWith('.root')) ?? 'geometry/cmsSimGeom-Run4D127.root';
+const input = args.find((a) => a.endsWith('.root')) ?? 'geometry/cmsSimGeom-Run4D128.root';
 const outDir = args.includes('--out') ? args[args.indexOf('--out') + 1] : 'public/data';
 const statsOnly = args.includes('--stats');
 

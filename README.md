@@ -23,7 +23,7 @@
   <a href="CONTRIBUTING.md">Contributing</a>
 </p>
 
-An interactive 3D model of the **CMS Phase-2 detector** (Run 4, scenario D127), built from
+An interactive 3D model of the **CMS Phase-2 detector** (Run 4, scenario D128), built from
 the CMSSW simulation geometry. Open it, cut the detector open, pick out a subsystem, click any
 part to see what it is made of and where it sits, or search for a volume by name. It runs
 entirely in the browser with [three.js](https://threejs.org); there is no server component.
@@ -75,7 +75,7 @@ The viewer reads ROOT files produced by CMSSW's Fireworks geometry dumps. They a
 the repository, so you generate them once (about 1.5 minutes plus a first-time setup).
 
 ```sh
-npm run export-geometry                          # D127, all three products
+npm run export-geometry                          # D128, all three products
 cmssw/export-geometry.sh -g D110 -p sim          # another scenario, sim file only
 cmssw/export-geometry.sh -r CMSSW_20_1_X_2026-09-25-2300   # another release
 ```
@@ -95,12 +95,12 @@ inside the VM, and the `reco` products also read the conditions database.
    the release, architecture, global tag, file sizes and hashes, and the number of
    error lines per log.
 
-| Flag | Meaning                                               | Default                        |
-| ---- | ----------------------------------------------------- | ------------------------------ |
-| `-r` | CMSSW release                                         | `CMSSW_20_1_X_2026-09-13-2300` |
-| `-a` | SCRAM architecture                                    | `el9_aarch64_gcc14`            |
-| `-g` | geometry scenario                                     | `D127`                         |
-| `-p` | products, comma separated: `sim`, `reco`, `tgeo-reco` | all three                      |
+| Flag | Meaning                                               | Default             |
+| ---- | ----------------------------------------------------- | ------------------- |
+| `-r` | CMSSW release                                         | `CMSSW_20_1_0_pre3` |
+| `-a` | SCRAM architecture                                    | `el9_aarch64_gcc14` |
+| `-g` | geometry scenario                                     | `D128`              |
+| `-p` | products, comma separated: `sim`, `reco`, `tgeo-reco` | all three           |
 
 | Product     | File                                         | Used for                         |
 | ----------- | -------------------------------------------- | -------------------------------- |
@@ -108,13 +108,17 @@ inside the VM, and the `reco` products also read the conditions database.
 | `reco`      | `cmsRecoGeom-Run4<GEOM>.root` (about 170 MB) | DetId lookup                     |
 | `tgeo-reco` | `cmsTGeoRecoGeom-Run4<GEOM>.root`            | not used; it lacks HGCAL and MTD |
 
-**Known messages.** "MEN geometry not found" is expected, because ME0 is not part of D127.
+**Known messages.** "MEN geometry not found" is expected, because ME0 is not part of D128.
 The `tgeo-reco` log contains a couple of hundred TGeoArb8 warnings about ECAL crystals and
 empty containers; they are a known limitation of that producer, not a failed run.
 
-**Release rotation.** The aarch64 releases are nightly builds that disappear from CVMFS after
-about two weeks, so the pinned default will eventually stop working. Pick a current one with
-`-r`, and update the default in `cmssw/export-geometry.sh`.
+**Scenario.** D128 has been the CMSSW default Phase-2 scenario since September 2026. It is D127
+with the earlier GE0 description (`ge0/TDR_Dev/v5`): the GE0 chambers are plain trapezoids
+rather than the corrected trapezoid-plus-rectangle shape. Everything else is identical.
+
+**Release choice.** The default is a full (pre-)release, which stays on CVMFS. Nightly builds
+(`CMSSW_20_1_X_<date>`) also work with `-r`, but they disappear from CVMFS after about two
+weeks, so do not pin one as the default.
 
 ### Without the CMSSW VM
 
@@ -123,15 +127,15 @@ in `geometry/`. From any CMSSW release that includes the Fireworks geometry dump
 
 ```sh
 cd $CMSSW_RELEASE_BASE/src/Fireworks/Geometry/python
-cmsRun dumpSimGeometry_cfg.py  tag=Run4 version=D127 out=cmsSimGeom-Run4D127.root
-cmsRun dumpRecoGeometry_cfg.py tag=Run4 version=D127 tgeo=False out=cmsRecoGeom-Run4D127.root
+cmsRun dumpSimGeometry_cfg.py  tag=Run4 version=D128 out=cmsSimGeom-Run4D128.root
+cmsRun dumpRecoGeometry_cfg.py tag=Run4 version=D128 tgeo=False out=cmsRecoGeom-Run4D128.root
 ```
 
 and copy the two ROOT files into `geometry/`. The simulation file (about 3 MB) is
 required by `npm run convert`; the reco file (about 170 MB) is only used by
 `npm run detids` for the DetId lookup. Without it, run `npm run convert` instead of
-`npm run data`; the viewer then just shows no DetIds. Recent CMSSW
-releases have not been checked beyond the pinned nightly in `cmssw/export-geometry.sh`.
+`npm run data`; the viewer then just shows no DetIds. Other CMSSW
+releases have not been checked beyond the one pinned in `cmssw/export-geometry.sh`.
 
 ## Controls
 
@@ -157,7 +161,7 @@ CMSSW (VM)  ->  geometry/*.root  ->  tools/convert.mjs  ->  public/data  ->  src
 - `cmssw/` — `export-geometry.sh` runs the stock Fireworks dump configs in a clean SCRAM
   area inside the [cmssw-workspace](https://github.com/rshrj/cmssw-workspace) VM and copies
   the ROOT files to `geometry/`. `manifest.txt` there records the release, global tag and
-  file hashes. Edit `RELEASE` when the pinned nightly rotates off CVMFS.
+  file hashes. `RELEASE` there pins the CMSSW release.
 - `tools/convert.mjs` — reads the TGeo geometry with JSROOT, tessellates each volume once,
   and writes per-subsystem binaries. Volumes with at least 200 copies are GPU-instanced,
   rarer ones are merged into shared meshes. It also writes the full placement tree.
